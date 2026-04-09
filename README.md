@@ -1,2 +1,2 @@
 # .github
-These will be having sample common templates across the repos
+Contains common reusable templates across the Org
