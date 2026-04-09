@@ -1,0 +1,34 @@
+name: Continuous Clearing
+
+on:
+  workflow_call:
+
+jobs:
+  cc-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Run Siemens Continuous Clearing Tool
+        uses: docker://ghcr.io/siemens/continuous-clearing:latest
+        env:
+          CC_SW360_URL: ${{ secrets.CC_SW360_URL }}
+          CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
+          CC_PROJECT_NAME: ${{ github.repository }}
+          CC_PROJECT_VERSION: ${{ github.ref_name }}
+          CC_OUTPUT_DIR: /workspace/cc-output
+        with:
+          args: >
+            # scan
+            # --source /workspace
+            # --sbom-format cyclonedx
+            # --enable-sw360
+            # --enable-fossology
+
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: cc-output/**/*.json
