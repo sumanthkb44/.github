@@ -9,7 +9,11 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4   
+        with:
+          repository: sumanthkb44/.github
+          ref: main
+          path: cc-template
 
       - name: Prepare runtime directories
         run: |
@@ -20,7 +24,7 @@ jobs:
 
       - name: Copy appSettings file
         run: |
-          cp .github/.github/workflows/appSettings_Docker.json \
+          cp cc-template/.github/workflows/appSettings_Docker.json \
              cc/AppConfig/appSettings_Docker.json
 
       - name: Run Siemens Continuous Clearing
