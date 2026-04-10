@@ -8,21 +8,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # 1️⃣ Checkout repository
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - name: Run Siemens Continuous Clearing
-        uses: docker://ghcr.io/siemens/continuous-clearing:latest
-        env:
-          CC_SW360_URL: ${{ secrets.CC_SW360_URL }}
-          CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
-        with:
-          args: >
-            # scan
-            # --source /workspace
-            # --sbom-format cyclonedx
+      # 2️⃣ Prepare directory structure (matches docker -v mounts)
+      - name: Prepare input/output/config directories
+        run: |
+          mkdir -p cc/Input
+          mkdir -p cc/Output
+          mkdir -p cc/AppConfig
+          mkdir -p cc/Log
 
+      # 3️⃣ Run Siemens Continuous Clearing via docker run
+      - name: Run Siemens Continuous Clearing (Docker)
+        # env:
+        #   CC_SW360_URL: ${{ secrets.CC_SW360_URL }}
+        #   CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/cc/Input:/mnt/Input" \
+            -v "${{ github.workspace }}/cc/Output:/mnt/Output" \
+            -v "${{ github.workspace }}/cc/AppConfig:/etc/CATool" \
+            -v "${{ github.workspace }}/cc/Log:/var/log" \
+            -e CC_SW360_URL \
+            -e CC_SW360_API_KEY \
+            ghcr.io/siemens/continuous-clearing \
+            dotnet PackageIdentifier.dll \
+            --settingsfilepath /etc/CATool/appSettings_Docker.json \
+            --SbomSigning:SBOMSignVerify false
+
+      # 4️⃣ Upload SBOM as GitHub artifact
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: cc-output/**/*.json
+          path: |
+            cc/Output/**/*.json
+``
