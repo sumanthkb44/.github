@@ -33,7 +33,6 @@ jobs:
         #   CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
         run: |
           docker run --rm \
-            # -v "${{ github.workspace }}/cc/Input:/mnt/Input" \
             -v "${{ github.workspace }}:/mnt/Input" \
             -v "${{ github.workspace }}/cc/Output:/mnt/Output" \
             -v "${{ github.workspace }}/cc/AppConfig:/etc/CATool" \
