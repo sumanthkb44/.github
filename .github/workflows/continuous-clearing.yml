@@ -8,20 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2️⃣ Prepare directory structure (matches docker -v mounts)
-      - name: Prepare input/output/config directories
+      - name: Prepare runtime directories
         run: |
           mkdir -p cc/Input
           mkdir -p cc/Output
           mkdir -p cc/AppConfig
           mkdir -p cc/Log
 
-      # 3️⃣ Run Siemens Continuous Clearing via docker run
-      - name: Run Siemens Continuous Clearing (Docker)
+      - name: Copy appSettings file
+        run: |
+          cp .github/.github/workflows/appSettings_Docker.json \
+             cc/AppConfig/appSettings_Docker.json
+
+      - name: Run Siemens Continuous Clearing
         # env:
         #   CC_SW360_URL: ${{ secrets.CC_SW360_URL }}
         #   CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
@@ -38,10 +40,8 @@ jobs:
             --settingsfilepath /etc/CATool/appSettings_Docker.json \
             --SbomSigning:SBOMSignVerify false
 
-      # 4️⃣ Upload SBOM as GitHub artifact
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: |
-            cc/Output/**/*.json
+          path: cc/Output/**/*.json
