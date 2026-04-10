@@ -27,13 +27,25 @@ jobs:
           cp cc-template/.github/workflows/appSettings_Docker.json \
              cc/AppConfig/appSettings_Docker.json
 
+      - name: Debug – container sees assets
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/SampleCoreAPI:/mnt/Input" \
+            ghcr.io/siemens/continuous-clearing \
+            /bin/bash -c "
+              echo 'PWD:' && pwd
+              echo 'Listing /mnt/Input:' && ls -la /mnt/Input
+              echo 'Looking for project.assets.json:'
+              find /mnt/Input -name project.assets.json -type f
+            "
+            
       - name: Run Siemens Continuous Clearing
         # env:
         #   CC_SW360_URL: ${{ secrets.CC_SW360_URL }}
         #   CC_SW360_API_KEY: ${{ secrets.CC_SW360_API_KEY }}
         run: |
           docker run --rm \
-            -v "${{ github.workspace }}:/mnt/Input" \
+            -v "${{ github.workspace }}/SampleCoreAPI:/mnt/Input" \
             -v "${{ github.workspace }}/cc/Output:/mnt/Output" \
             -v "${{ github.workspace }}/cc/AppConfig:/etc/CATool" \
             -v "${{ github.workspace }}/cc/Log:/var/log" \
